@@ -6,6 +6,7 @@ PV-Leistung, Batteriestand, anwesenden Personen und anstehenden Müllabholungen.
 
 * **LBS-Nummer:** 19002713
 * **Version:** 1.0
+* **Lizenz:** GNU Lesser General Public License v3.0 (LGPL-3.0)
 * **Datei:** `19002713_lbs.php`
 * **Ausgabe:** fertiger Sprachtext, der direkt an Alexa bzw. an den
   Sprachausgabe-LBS **19002715** übergeben werden kann.
@@ -59,6 +60,16 @@ mit allen Zusatzinfos.
    importieren (die LBS-Nummer wird beim Import vergeben).
 2. Baustein in eine Logikseite ziehen, Eingänge verknüpfen, A1 z. B. mit dem
    Sprachausgabe-Baustein verbinden.
+
+## Lizenz
+
+Dieser Logikbaustein steht unter der **GNU Lesser General Public License v3.0
+(LGPL-3.0)**. Copyright (C) 2026 Thorsten Gehrig.
+
+* vollständiger Lizenztext: [`LICENSE`](LICENSE)
+* die LGPL-3.0 baut auf der GPL-3.0 auf, deren Text in
+  [`LICENSE.GPL`](LICENSE.GPL) beiliegt
+* SPDX-Kennung im Quelltext: `LGPL-3.0-only`
 
 ## Changelog
 
