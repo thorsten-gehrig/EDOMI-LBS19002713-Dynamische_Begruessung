@@ -1,7 +1,7 @@
 ###[DEF]###
 [name		= Dynamische Begruessung	]
 
-[e#1		= Trigger (1=Komm, 2=Geh)	]
+[e#1		= Trigger (1=Komm, 2=Geh, 3=Komm+Status, 4=Geh+Status)	]
 [e#2		= Name				]
 [e#3		= PV-Leistung (W)		]
 [e#4		= Batteriestatus (%)		]
@@ -18,15 +18,20 @@
 Der Baustein generiert dynamische Begrüßungen und Verabschiedungen für Sprachassistenten.
 
 Eingänge:
-E1: Trigger (1 = Begrüßung / Ankunft, 2 = Verabschiedung / Verlassen)
+E1: Trigger (1 = Begrüßung / Ankunft, 2 = Verabschiedung / Verlassen, 3 = Begrüßung mit Status, 4 = Verabschiedung mit Status)
 E2: Name der Person (Text). Bleibt der Eingang leer, wird "Thorsten" verwendet.
-E3: Aktuelle PV-Leistung in Watt (Zahl) - wird bei Ankunft angesagt
-E4: Aktueller Batteriestatus / SoC in Prozent (Zahl) - wird bei Ankunft angesagt
+E3: Aktuelle PV-Leistung in Watt (Zahl) - Statusansage nur bei E1 = 3. Ab 3 Kilowatt wird die Leistung in vollen Kilowatt angesagt.
+E4: Aktueller Batteriestatus / SoC in Prozent (Zahl) - Statusansage nur bei E1 = 3 und nur, wenn die PV-Leistung nicht bereits angesagt wurde
 E5: Feiertag/Wochenende (1 = Ja, 0 = Nein) - aktiviert entspanntere Begrüßungen
 E6: Anzahl Personen anwesend (Zahl) - Bei '0' werden beim Verlassen spezielle Sätze für das leere Haus (Energiesparmodus etc.) freigeschaltet.
-E7: Mülltonne (1 = Ja, 0 = Nein) - Erinnert beim Verlassen an die Mülltonne.
-E8: Gelber Sack (1 = Ja, 0 = Nein) - Erinnert beim Verlassen an den Gelben Sack.
-E9: Altpapier (1 = Ja, 0 = Nein) - Erinnert beim Verlassen an das Altpapier.
+E7: Mülltonne (1 = Ja, 0 = Nein) - Erinnert bei E1 = 4 an die Mülltonne.
+E8: Gelber Sack (1 = Ja, 0 = Nein) - Erinnert bei E1 = 4 an den Gelben Sack.
+E9: Altpapier (1 = Ja, 0 = Nein) - Erinnert bei E1 = 4 an das Altpapier.
+
+Hinweis: Die Zusatzinformationen aus E3, E4, E7, E8 und E9 werden nur bei
+E1 = 3 (Komm mit Status) bzw. E1 = 4 (Geh mit Status) ausgewertet. Bei
+E1 = 1 und E1 = 2 entfällt der Statusteil, es wird nur der Begrüßungs- bzw.
+Verabschiedungstext ausgegeben.
 
 Ausgänge:
 A1: Fertiger Sprachtext (kann direkt an Alexa / LBS 19002715 übergeben werden)
@@ -43,7 +48,7 @@ function LB_LBSID($id) {
         
         $name = $E[2]['value'];
         if (trim($name) == "") {
-            $name = "Unbekannter";
+            $name = "Thorsten";
         }
         
         $pv_power = (int)$E[3]['value'];
@@ -57,8 +62,8 @@ function LB_LBSID($id) {
         
         $final_text = "";
         
-        // --- 1. LOGIK FÜR BEGRÜSSUNG (Ankunft) ---
-        if ($trigger == 1) {
+        // --- 1. LOGIK FÜR BEGRÜSSUNG (Ankunft: 1 = ohne Status, 3 = mit Status) ---
+        if ($trigger == 1 || $trigger == 3) {
             $hour = (int)date('H');
             $day_of_week = (int)date('N'); 
             $is_weekend = ($day_of_week >= 6) ? true : false;
@@ -139,20 +144,23 @@ function LB_LBSID($id) {
             
             $greeting_text = $greetings[array_rand($greetings)];
             
+            // Status aus E3/E4 nur bei Trigger 3 (Komm mit Status) ansagen
             $status_text = "";
-            if ($pv_power > 2000) {
-                $kw = str_replace('.', ',', (string)round($pv_power / 1000, 1));
-                $status_text = " Die Sonne liefert gerade kräftige $kw Kilowatt.";
-            } elseif ($battery_soc >= 80) {
-                $status_text = " Dein Speicher ist mit $battery_soc Prozent prall gefüllt.";
-            } elseif ($battery_soc <= 20) {
-                $status_text = " Achtung, dein Heimspeicher ist nur noch bei $battery_soc Prozent.";
+            if ($trigger == 3) {
+                if ($pv_power > 3000) {
+                    $kw = (int)round($pv_power / 1000);
+                    $status_text = " Die Sonne liefert gerade kräftige $kw Kilowatt.";
+                } elseif ($battery_soc >= 80) {
+                    $status_text = " Dein Speicher ist mit $battery_soc Prozent prall gefüllt.";
+                } elseif ($battery_soc <= 20) {
+                    $status_text = " Achtung, dein Heimspeicher ist nur noch bei $battery_soc Prozent.";
+                }
             }
             
             $final_text = $greeting_text . $status_text;
             
-        // --- 2. LOGIK FÜR VERABSCHIEDUNG (Verlassen) ---
-        } elseif ($trigger == 2) {
+        // --- 2. LOGIK FÜR VERABSCHIEDUNG (Verlassen: 2 = ohne Status, 4 = mit Status) ---
+        } elseif ($trigger == 2 || $trigger == 4) {
             $farewells = array(
                 "Tschüss $name, bis später!",
                 "Mach's gut $name! Ich halte hier die Stellung.",
@@ -175,21 +183,23 @@ function LB_LBSID($id) {
             
             $farewell_text = $farewells[array_rand($farewells)];
             
-            // Müll-Erinnerung
-            $trash_items = array();
-            if ($trash_muell == 1) { $trash_items[] = "die Mülltonne"; }
-            if ($trash_gelb == 1) { $trash_items[] = "den Gelben Sack"; }
-            if ($trash_papier == 1) { $trash_items[] = "das Altpapier"; }
-            
+            // Müll-Erinnerung aus E7/E8/E9 nur bei Trigger 4 (Geh mit Status)
             $trash_text = "";
-            if (count($trash_items) > 0) {
-                $last_item = array_pop($trash_items);
+            if ($trigger == 4) {
+                $trash_items = array();
+                if ($trash_muell == 1) { $trash_items[] = "die Mülltonne"; }
+                if ($trash_gelb == 1) { $trash_items[] = "den Gelben Sack"; }
+                if ($trash_papier == 1) { $trash_items[] = "das Altpapier"; }
+
                 if (count($trash_items) > 0) {
-                    $trash_string = implode(", ", $trash_items) . " und " . $last_item;
-                } else {
-                    $trash_string = $last_item;
+                    $last_item = array_pop($trash_items);
+                    if (count($trash_items) > 0) {
+                        $trash_string = implode(", ", $trash_items) . " und " . $last_item;
+                    } else {
+                        $trash_string = $last_item;
+                    }
+                    $trash_text = " Vergiss nicht, $trash_string herauszustellen.";
                 }
-                $trash_text = " Vergiss nicht, $trash_string herauszustellen.";
             }
             
             $final_text = $farewell_text . $trash_text;

@@ -13,35 +13,43 @@ PV-Leistung, Batteriestand, anwesenden Personen und anstehenden Müllabholungen.
 
 | Eingang | Bedeutung |
 | ------- | --------- |
-| E1 | Trigger: `1` = Begrüßung (Ankunft), `2` = Verabschiedung (Verlassen) |
-| E2 | Name der Person (leer → „Unbekannter") |
-| E3 | Aktuelle PV-Leistung in Watt – wird bei Ankunft angesagt |
-| E4 | Batteriestatus / SoC in Prozent – wird bei Ankunft angesagt |
+| E1 | Trigger: `1` = Begrüßung (Komm), `2` = Verabschiedung (Geh), `3` = Begrüßung **mit Status**, `4` = Verabschiedung **mit Status** |
+| E2 | Name der Person (leer → „Thorsten") |
+| E3 | Aktuelle PV-Leistung in Watt – Statusansage nur bei E1 = 3 |
+| E4 | Batteriestatus / SoC in Prozent – Statusansage nur bei E1 = 3 |
 | E5 | Feiertag/Wochenende (`1` = Ja) – aktiviert entspanntere Begrüßungen |
 | E6 | Anzahl Personen anwesend – bei `0` zusätzliche Sätze fürs leere Haus |
-| E7 | Mülltonne (`1` = Ja) – Erinnerung beim Verlassen |
-| E8 | Gelber Sack (`1` = Ja) – Erinnerung beim Verlassen |
-| E9 | Altpapier (`1` = Ja) – Erinnerung beim Verlassen |
+| E7 | Mülltonne (`1` = Ja) – Erinnerung nur bei E1 = 4 |
+| E8 | Gelber Sack (`1` = Ja) – Erinnerung nur bei E1 = 4 |
+| E9 | Altpapier (`1` = Ja) – Erinnerung nur bei E1 = 4 |
 
 | Ausgang | Bedeutung |
 | ------- | --------- |
 | A1 | Fertiger Sprachtext |
 
+**Wichtig:** Die Zusatzinformationen aus E3, E4, E7, E8 und E9 werden
+ausschließlich bei `E1 = 3` (Komm mit Status) bzw. `E1 = 4` (Geh mit Status)
+ausgewertet. Bei `E1 = 1` und `E1 = 2` wird nur der reine Begrüßungs- bzw.
+Verabschiedungstext ausgegeben. So lassen sich zwei KOs an den Baustein hängen:
+ein „stiller" Trigger für die reine Anwesenheitsmeldung und ein Status-Trigger
+mit allen Zusatzinfos.
+
 ## Logik
 
-**Begrüßung (E1 = 1)**
+**Begrüßung (E1 = 1 oder 3)**
 * Textpool je nach Tageszeit (vor 12 Uhr, 12–18 Uhr, ab 18 Uhr)
 * eigener, entspannterer Textpool an Wochenenden und Feiertagen
-* optionale Statusansage:
-  * PV-Leistung > 2000 W → „Die Sonne liefert gerade kräftige X Kilowatt."
+* Statusansage nur bei E1 = 3:
+  * PV-Leistung > 3000 W → „Die Sonne liefert gerade kräftige X Kilowatt."
+    (X = volle Kilowatt, z. B. 3450 W → „3 Kilowatt")
   * sonst Batterie ≥ 80 % → „Dein Speicher ist … prall gefüllt."
   * sonst Batterie ≤ 20 % → Warnung zum niedrigen Speicherstand
 
-**Verabschiedung (E1 = 2)**
+**Verabschiedung (E1 = 2 oder 4)**
 * zufälliger Abschiedssatz
 * bei 0 anwesenden Personen zusätzlich Sätze zum Abwesenheits-/Energiesparmodus
-* Erinnerung an Mülltonne, Gelben Sack und Altpapier (auch kombiniert:
-  „Vergiss nicht, die Mülltonne und den Gelben Sack herauszustellen.")
+* Müll-Erinnerung nur bei E1 = 4, auch kombiniert:
+  „Vergiss nicht, die Mülltonne und den Gelben Sack herauszustellen."
 
 ## Installation
 
@@ -49,3 +57,11 @@ PV-Leistung, Batteriestand, anwesenden Personen und anstehenden Müllabholungen.
    importieren (die LBS-Nummer wird beim Import vergeben).
 2. Baustein in eine Logikseite ziehen, Eingänge verknüpfen, A1 z. B. mit dem
    Sprachausgabe-Baustein verbinden.
+
+## Changelog
+
+* **1.1.0** – Trigger 3/4 (Komm/Geh mit Status) ergänzt: E3, E4, E7, E8 und E9
+  werden nur noch bei diesen Triggern ausgewertet. PV-Ansage ab 3000 W in
+  vollen Kilowatt (vorher ab 2000 W mit einer Nachkommastelle). Leerer Name
+  ergibt jetzt wie dokumentiert „Thorsten" (vorher „Unbekannter").
+* **1.0.0** – Erste Version.
