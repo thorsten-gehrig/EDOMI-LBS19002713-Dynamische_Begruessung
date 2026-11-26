@@ -14,8 +14,8 @@ PV-Leistung, Batteriestand, anwesenden Personen und anstehenden Müllabholungen.
 | Eingang | Bedeutung |
 | ------- | --------- |
 | E1 | Trigger: `1` = Begrüßung (Komm), `2` = Verabschiedung (Geh), `3` = Begrüßung **mit Status**, `4` = Verabschiedung **mit Status** |
-| E2 | Name der Person (leer → „Thorsten") |
-| E3 | Aktuelle PV-Leistung in Watt – Statusansage nur bei E1 = 3 |
+| E2 | Name der Person (leer → „Unbekannter") |
+| E3 | Aktuelle PV-Leistung in Watt – Statusansage nur bei E1 = 3 (> 1000 W: bis 3000 W in Watt, darüber in vollen Kilowatt) |
 | E4 | Batteriestatus / SoC in Prozent – Statusansage nur bei E1 = 3 |
 | E5 | Feiertag/Wochenende (`1` = Ja) – aktiviert entspanntere Begrüßungen |
 | E6 | Anzahl Personen anwesend – bei `0` zusätzliche Sätze fürs leere Haus |
@@ -40,8 +40,9 @@ mit allen Zusatzinfos.
 * Textpool je nach Tageszeit (vor 12 Uhr, 12–18 Uhr, ab 18 Uhr)
 * eigener, entspannterer Textpool an Wochenenden und Feiertagen
 * Statusansage nur bei E1 = 3:
-  * PV-Leistung > 3000 W → „Die Sonne liefert gerade kräftige X Kilowatt."
-    (X = volle Kilowatt, z. B. 3450 W → „3 Kilowatt")
+  * PV-Leistung > 1000 W → Ansage der Leistung:
+    * bis 3000 W in Watt (z. B. 2450 W → „Die Sonne liefert gerade 2450 Watt.")
+    * über 3000 W in vollen Kilowatt (z. B. 3450 W → „… kräftige 3 Kilowatt.")
   * sonst Batterie ≥ 80 % → „Dein Speicher ist … prall gefüllt."
   * sonst Batterie ≤ 20 % → Warnung zum niedrigen Speicherstand
 
@@ -60,8 +61,8 @@ mit allen Zusatzinfos.
 
 ## Changelog
 
+* **1.2.0** – PV-Ansage jetzt bereits ab mehr als 1000 W: bis 3000 W in Watt,
+  darüber in vollen Kilowatt. Leerer Name (E2) ergibt wieder „Unbekannter".
 * **1.1.0** – Trigger 3/4 (Komm/Geh mit Status) ergänzt: E3, E4, E7, E8 und E9
-  werden nur noch bei diesen Triggern ausgewertet. PV-Ansage ab 3000 W in
-  vollen Kilowatt (vorher ab 2000 W mit einer Nachkommastelle). Leerer Name
-  ergibt jetzt wie dokumentiert „Thorsten" (vorher „Unbekannter").
+  werden nur noch bei diesen Triggern ausgewertet.
 * **1.0.0** – Erste Version.

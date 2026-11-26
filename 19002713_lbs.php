@@ -19,8 +19,8 @@ Der Baustein generiert dynamische Begrüßungen und Verabschiedungen für Sprach
 
 Eingänge:
 E1: Trigger (1 = Begrüßung / Ankunft, 2 = Verabschiedung / Verlassen, 3 = Begrüßung mit Status, 4 = Verabschiedung mit Status)
-E2: Name der Person (Text). Bleibt der Eingang leer, wird "Thorsten" verwendet.
-E3: Aktuelle PV-Leistung in Watt (Zahl) - Statusansage nur bei E1 = 3. Ab 3 Kilowatt wird die Leistung in vollen Kilowatt angesagt.
+E2: Name der Person (Text). Bleibt der Eingang leer, wird "Unbekannter" verwendet.
+E3: Aktuelle PV-Leistung in Watt (Zahl) - Statusansage nur bei E1 = 3. Ab mehr als 1000 W wird die Leistung angesagt: bis 3000 W in Watt, darüber in vollen Kilowatt.
 E4: Aktueller Batteriestatus / SoC in Prozent (Zahl) - Statusansage nur bei E1 = 3 und nur, wenn die PV-Leistung nicht bereits angesagt wurde
 E5: Feiertag/Wochenende (1 = Ja, 0 = Nein) - aktiviert entspanntere Begrüßungen
 E6: Anzahl Personen anwesend (Zahl) - Bei '0' werden beim Verlassen spezielle Sätze für das leere Haus (Energiesparmodus etc.) freigeschaltet.
@@ -48,7 +48,7 @@ function LB_LBSID($id) {
         
         $name = $E[2]['value'];
         if (trim($name) == "") {
-            $name = "Thorsten";
+            $name = "Unbekannter";
         }
         
         $pv_power = (int)$E[3]['value'];
@@ -150,6 +150,8 @@ function LB_LBSID($id) {
                 if ($pv_power > 3000) {
                     $kw = (int)round($pv_power / 1000);
                     $status_text = " Die Sonne liefert gerade kräftige $kw Kilowatt.";
+                } elseif ($pv_power > 1000) {
+                    $status_text = " Die Sonne liefert gerade $pv_power Watt.";
                 } elseif ($battery_soc >= 80) {
                     $status_text = " Dein Speicher ist mit $battery_soc Prozent prall gefüllt.";
                 } elseif ($battery_soc <= 20) {
