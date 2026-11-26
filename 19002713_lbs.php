@@ -1,5 +1,5 @@
 ###[DEF]###
-[name		= Dynamische Begruessung	]
+[name		= Dynamische Begruessung v1.0	]
 
 [e#1		= Trigger (1=Komm, 2=Geh, 3=Komm+Status, 4=Geh+Status)	]
 [e#2		= Name				]
@@ -16,6 +16,8 @@
 
 ###[HELP]###
 Der Baustein generiert dynamische Begrüßungen und Verabschiedungen für Sprachassistenten.
+
+Version: 1.0
 
 Eingänge:
 E1: Trigger (1 = Begrüßung / Ankunft, 2 = Verabschiedung / Verlassen, 3 = Begrüßung mit Status, 4 = Verabschiedung mit Status)

@@ -5,6 +5,7 @@ Sprachassistenten erzeugt – abhängig von Tageszeit, Wochenende/Feiertag,
 PV-Leistung, Batteriestand, anwesenden Personen und anstehenden Müllabholungen.
 
 * **LBS-Nummer:** 19002713
+* **Version:** 1.0
 * **Datei:** `19002713_lbs.php`
 * **Ausgabe:** fertiger Sprachtext, der direkt an Alexa bzw. an den
   Sprachausgabe-LBS **19002715** übergeben werden kann.
@@ -61,8 +62,6 @@ mit allen Zusatzinfos.
 
 ## Changelog
 
-* **1.2.0** – PV-Ansage jetzt bereits ab mehr als 1000 W: bis 3000 W in Watt,
-  darüber in vollen Kilowatt. Leerer Name (E2) ergibt wieder „Unbekannter".
-* **1.1.0** – Trigger 3/4 (Komm/Geh mit Status) ergänzt: E3, E4, E7, E8 und E9
-  werden nur noch bei diesen Triggern ausgewertet.
-* **1.0.0** – Erste Version.
+* **1.0** – Erste veröffentlichte Version: Trigger 1–4 (Komm/Geh, jeweils mit
+  und ohne Status), Tageszeit- und Wochenend-/Feiertagsbegrüßungen,
+  PV-/Batterie-Statusansage bei E1 = 3, Müll-Erinnerung bei E1 = 4.
